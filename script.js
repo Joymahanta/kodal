@@ -23,7 +23,7 @@ document.getElementById('fileInput').addEventListener('change', function (e) {
     };
     reader.readAsArrayBuffer(file);
   } else {
-    alert('Unsupported file type. Please upload .csv or .xls/.xlsx');
+    alert('Unsupported file type. Please upload .csv, .xls, or .xlsx');
   }
 });
 
@@ -47,16 +47,11 @@ function showTable(rows) {
       <td>${sNo}</td>
       <td>${name}</td>
       <td>${phone}</td>
-      <td>
-        <button class="dial-btn">Dial</button>
-      </td>
-      <td>
-        <a href="https://wa.me/91${phone}?text=${message}" target="_blank">
-          <button class="whatsapp">WhatsApp</button>
-        </a>
-      </td>
+      <td><button class="dial-btn">Dial</button></td>
+      <td></td>
     `;
 
+    // Dial button logic
     const dialButton = row.querySelector('.dial-btn');
     dialButton.addEventListener('click', function () {
       window.location.href = `tel:${phone}`;
@@ -69,6 +64,20 @@ function showTable(rows) {
         }
       }, 1000);
     });
+
+    // WhatsApp button creation
+    const whatsappBtn = document.createElement('button');
+    whatsappBtn.innerText = 'WhatsApp';
+    whatsappBtn.className = 'whatsapp';
+    whatsappBtn.addEventListener('click', function () {
+      window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
+      whatsappBtn.innerText = 'Sent';
+      whatsappBtn.disabled = true;
+      whatsappBtn.classList.add('done');
+    });
+
+    const whatsappCell = row.querySelector('td:last-child');
+    whatsappCell.appendChild(whatsappBtn);
 
     tbody.appendChild(row);
   });
