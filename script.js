@@ -1,49 +1,75 @@
-body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f4f4f4;
-}
+document.getElementById('fileInput').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
-.container {
-  max-width: 800px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-}
+  const ext = file.name.split('.').pop().toLowerCase();
 
-h1 {
-  text-align: center;
-}
+  if (ext === 'csv') {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const text = e.target.result;
+      const rows = text.trim().split('\n').map(line => line.split(','));
+      showTable(rows);
+    };
+    reader.readAsText(file);
+  } else if (ext === 'xls' || ext === 'xlsx') {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      showTable(rows);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    alert('Unsupported file type. Please upload .csv or .xls/.xlsx');
+  }
+});
 
-input[type="file"] {
-  margin-bottom: 20px;
-}
+function showTable(rows) {
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '';
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+  rows.forEach((cols, index) => {
+    if (cols.length < 2) return;
 
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
-}
+    const sNo = index + 1;
+    const name = cols[0]?.trim();
+    const phone = cols[1]?.toString().trim();
 
-button {
-  padding: 5px 10px;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
+    const message = encodeURIComponent(
+      `Dear Candidate,\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
+    );
 
-button.done {
-  background-color: gray;
-  color: white;
-}
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${sNo}</td>
+      <td>${name}</td>
+      <td>${phone}</td>
+      <td>
+        <button class="dial-btn">Dial</button>
+      </td>
+      <td>
+        <a href="https://wa.me/91${phone}?text=${message}" target="_blank">
+          <button class="whatsapp">WhatsApp</button>
+        </a>
+      </td>
+    `;
 
-button.whatsapp {
-  background-color: #25D366;
-  color: white;
+    const dialButton = row.querySelector('.dial-btn');
+    dialButton.addEventListener('click', function () {
+      window.location.href = `tel:${phone}`;
+      setTimeout(() => {
+        const confirmed = confirm(`Did the call to ${phone} connect successfully?`);
+        if (confirmed) {
+          dialButton.innerText = 'Done';
+          dialButton.classList.add('done');
+          dialButton.disabled = true;
+        }
+      }, 1000);
+    });
+
+    tbody.appendChild(row);
+  });
 }
