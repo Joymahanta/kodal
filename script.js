@@ -1,55 +1,49 @@
-function parseExcelOrPDFData(rows) {
-  const tbody = document.querySelector('#dataTable tbody');
-  tbody.innerHTML = '';
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
 
-  rows.forEach((cols, index) => {
-    if (cols.length < 2) return;
+.container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
 
-    const serial = index + 1;
-    const name = cols[0]?.trim();
-    const phone = cols[1]?.trim();
+h1 {
+  text-align: center;
+}
 
-    // WhatsApp message (URL encoded)
-    const message = encodeURIComponent(
-      `Dear Candidate,\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
-    );
+input[type="file"] {
+  margin-bottom: 20px;
+}
 
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${serial}</td>
-      <td>${name}</td>
-      <td>${phone}</td>
-      <td>
-        <a href="tel:${phone}" class="dial-btn">
-          <button data-index="${index}">Dial</button>
-        </a>
-      </td>
-      <td>
-        <a href="https://wa.me/91${phone}?text=${message}" target="_blank">
-          <button class="whatsapp">WhatsApp</button>
-        </a>
-      </td>
-    `;
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-    tbody.appendChild(row);
-  });
+th, td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
 
-  // Dial button confirmation logic
-  document.querySelectorAll('.dial-btn button').forEach(button => {
-    button.addEventListener('click', function () {
-      const phone = this.closest('tr').children[2].innerText;
-      setTimeout(() => {
-        const confirmed = confirm(`Did the call to ${phone} connect successfully?`);
-        if (confirmed) {
-          this.innerText = 'Done';
-          this.classList.add('done');
-          this.disabled = true;
-        } else {
-          this.innerText = 'Dial';
-          this.classList.remove('done');
-          this.disabled = false;
-        }
-      }, 1000);
-    });
-  });
+button {
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button.done {
+  background-color: gray;
+  color: white;
+}
+
+button.whatsapp {
+  background-color: #25D366;
+  color: white;
 }
