@@ -39,7 +39,7 @@ function showTable(rows) {
     const phone = cols[1]?.toString().trim();
 
     const message = encodeURIComponent(
-      `Dear Candidate,\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
+      `Dear ${name},\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
     );
 
     const row = document.createElement('tr');
