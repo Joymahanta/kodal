@@ -1,3 +1,4 @@
+
 document.getElementById('fileInput').addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -12,31 +13,6 @@ document.getElementById('fileInput').addEventListener('change', function (e) {
       showTable(rows);
     };
     reader.readAsText(file);
-
-  } else if (ext === 'pdf') {
-    const reader = new FileReader();
-    reader.onload = async function (e) {
-      const typedarray = new Uint8Array(e.target.result);
-      const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-      let text = '';
-
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const pageText = content.items.map(item => item.str).join(' ');
-        text += pageText + '\n';
-      }
-
-      const lines = text.trim().split('\n').filter(line => line.trim());
-      const rows = lines.map(line => {
-        const parts = line.split(/,|-/); // support both comma and dash separators
-        return [parts[0]?.trim(), parts[1]?.trim()];
-      });
-
-      showTable(rows);
-    };
-    reader.readAsArrayBuffer(file);
-
   } else if (ext === 'xls' || ext === 'xlsx') {
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -47,8 +23,63 @@ document.getElementById('fileInput').addEventListener('change', function (e) {
       showTable(rows);
     };
     reader.readAsArrayBuffer(file);
-
   } else {
-    alert('Unsupported file type. Please upload .csv, .xls, .xlsx, or .pdf');
+    alert('Unsupported file type. Please upload .csv, .xls, or .xlsx');
   }
 });
+
+function showTable(rows) {
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '';
+
+  rows.forEach((cols, index) => {
+    if (cols.length < 2) return;
+
+    const sNo = index + 1;
+    const name = cols[0]?.trim();
+    const phone = cols[1]?.toString().trim();
+
+    const message = encodeURIComponent(
+      `Dear ${name},\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
+    );
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${sNo}</td>
+      <td>${name}</td>
+      <td>${phone}</td>
+      <td><button class="dial-btn">Dial</button></td>
+      <td></td>
+    `;
+
+    // Dial button logic
+    const dialButton = row.querySelector('.dial-btn');
+    dialButton.addEventListener('click', function () {
+      window.location.href = `tel:${phone}`;
+      setTimeout(() => {
+        const confirmed = confirm(`Did the call to ${phone} connect successfully?`);
+        if (confirmed) {
+          dialButton.innerText = 'Done';
+          dialButton.classList.add('done');
+          dialButton.disabled = true;
+        }
+      }, 1000);
+    });
+
+    // WhatsApp button creation
+    const whatsappBtn = document.createElement('button');
+    whatsappBtn.innerText = 'WhatsApp';
+    whatsappBtn.className = 'whatsapp';
+    whatsappBtn.addEventListener('click', function () {
+      window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
+      whatsappBtn.innerText = 'Sent';
+      whatsappBtn.disabled = true;
+      whatsappBtn.classList.add('done');
+    });
+
+    const whatsappCell = row.querySelector('td:last-child');
+    whatsappCell.appendChild(whatsappBtn);
+
+    tbody.appendChild(row);
+  });
+}
