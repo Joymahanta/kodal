@@ -1,33 +1,3 @@
-
-document.getElementById('fileInput').addEventListener('change', function (e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const ext = file.name.split('.').pop().toLowerCase();
-
-  if (ext === 'csv') {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const text = e.target.result;
-      const rows = text.trim().split('\n').map(line => line.split(','));
-      showTable(rows);
-    };
-    reader.readAsText(file);
-  } else if (ext === 'xls' || ext === 'xlsx') {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      showTable(rows);
-    };
-    reader.readAsArrayBuffer(file);
-  } else {
-    alert('Unsupported file type. Please upload .csv, .xls, or .xlsx');
-  }
-});
-
 function showTable(rows) {
   const tbody = document.querySelector('#dataTable tbody');
   tbody.innerHTML = '';
@@ -40,7 +10,7 @@ function showTable(rows) {
     const phone = cols[1]?.toString().trim();
 
     const message = encodeURIComponent(
-      `Dear ${name},\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
+      `Dear ${name},\n\nWe are pleased to inform you that your job application on Apna has been shortlisted for the interview round at PNB MetLife.\n\nKindly share your updated CV/resume at your earliest convenience to mahantajoy1234@gmail.com. Interview details will be shared with you upon confirmation.\n\nLooking forward to your response.`
     );
 
     const row = document.createElement('tr');
@@ -66,19 +36,19 @@ function showTable(rows) {
       }, 1000);
     });
 
-    // WhatsApp button creation
-    const whatsappBtn = document.createElement('button');
-    whatsappBtn.innerText = 'WhatsApp';
-    whatsappBtn.className = 'whatsapp';
-    whatsappBtn.addEventListener('click', function () {
-      window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
-      whatsappBtn.innerText = 'Sent';
-      whatsappBtn.disabled = true;
-      whatsappBtn.classList.add('done');
+    // SMS button logic
+    const smsBtn = document.createElement('button');
+    smsBtn.innerText = 'Message';
+    smsBtn.className = 'sms';
+    smsBtn.addEventListener('click', function () {
+      window.location.href = `sms:${phone}?body=${message}`;
+      smsBtn.innerText = 'Sent';
+      smsBtn.disabled = true;
+      smsBtn.classList.add('done');
     });
 
-    const whatsappCell = row.querySelector('td:last-child');
-    whatsappCell.appendChild(whatsappBtn);
+    const smsCell = row.querySelector('td:last-child');
+    smsCell.appendChild(smsBtn);
 
     tbody.appendChild(row);
   });
